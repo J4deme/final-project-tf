@@ -58,17 +58,5 @@ resource "azurerm_function_app" "bestrong_app" {
   storage_account_name       = azurerm_storage_account.main.name
   storage_account_access_key = azurerm_storage_account.main.primary_access_key
 
-  version                    = "~4"
-  os_type                    = "linux"
-
-  app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME"      = "python"
-    "WEBSITE_RUN_FROM_PACKAGE"     = "1"
-    "FileShareConnectionString"    = ""
-    "FormRecognizerEndpoint"       = ""
-    "FormRecognizerKey"            = ""
-    "BlobStorageConnectionString"  = ""
-    "DiscordWebhookUrl"            = ""
-    "SlackWebhookUrl"              = ""
-  }
+  
 }

@@ -1,45 +1,45 @@
-# Create Azure storage
+# BeStrong Infrastructure (Terraform)
 
-```bash
-az group create --name rg-terraform-state --location westeurope
+This repository contains Terraform configurations to manage the infrastructure for the BeStrong application across multiple environments (dev, prod) in Azure.
 
-```
+![Alt text](infra.drawio.png)
 
-```bash
-az storage account create --name tfstatestoragebestrong \
-  --resource-group rg-terraform-state \
-  --location westeurope \
-  --sku Standard_LRS \
-  --kind StorageV2
+### Diagram describes interaction inside created infrastructure
 
-```
+---
 
-```bash
-az storage container create --name tfstate \
-  --account-name tfstatestoragebestrong \
-  --public-access off
+## Architecture Overview
 
-```
+The infrastructure is divided into 3 main resource groups:
 
-## Create key-vault
+### `rg-terraform-state` (Shared)
 
-<!-- ```bash
-az keyvault create --name kv-terraform-secrets --resource-group rg-terraform-state --location westeurope
+#### It needs to be pre-configured and persistent
 
-``` -->
+- **Key Vault**: `newbestrongkeyvault`
+  - Stores sensitive credentials (`client_id`, `client_secret`, etc.)
+- **Storage Account**: `tfstatestoragebestrong`
+  - Blob container `tfstate` holds remote Terraform state files
 
-### Set secrets
+### `prod-rg` and `dev-rg` (Per Environment)
 
-```bash
-az keyvault secret set --vault-name bestrongkeyvault --name "TerraformClientId" --value "<your-client-id>"
-az keyvault secret set --vault-name bestrongkeyvault --name "TerraformClientSecret" --value "<your-client-secret>"
-az keyvault secret set --vault-name bestrongkeyvault --name "TerraformTenantId" --value "<your-tenant-id>"
-az keyvault secret set --vault-name bestrongkeyvault --name "TerraformSubscriptionId" --value "<your-subscription-id>"
+- **Storage Account** (`prodstorageacctbestrong` / `devstorageacctbestrong`)
+  - File Share: `myshare`
+  - Blob Container: `mycontainer`
+- **Azure Function App** (`prodbestrongfuncapp`/`devbestrongfuncapp`)
+  - Triggered by JSON file uploads
+  - Processes PDF files and writes outputs
+- **App Plan** (`prodbestrongplan`/`devbestrongplan`)
+- **Form recognizer**: `prodformai` / `devformai`
 
-```
+---
 
-#### To get crentials
+## Getting Started
 
-```bash
-az ad sp create-for-rbac --name "terraform-sp" --role="Contributor" --scopes="/subscriptions/<your-subscription-id>"
-```
+Trigger the pipeline in **Azure DevOps**.
+
+---
+
+## Secrets Management
+
+Secrets are stored in **Azure Key Vault**
